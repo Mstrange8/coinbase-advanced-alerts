@@ -5,7 +5,7 @@ services:
     plan: starter # we choose a plan with persistence to ensure tasks are not lost upon restart
     maxmemoryPolicy: noeviction # recommended policy for queues
     ipAllowList: [] # only allow internal connections
-  - type: worker
+  - type: web
     name: queue
     region: ohio
     env: python
