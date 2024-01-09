@@ -1,12 +1,20 @@
-import os
 from celery import Celery
-from celery.utils.log import get_task_logger
+import celeryconfig
+from celery import shared_task
 
-app = Celery('tasks', broker=os.getenv("CELERY_BROKER_URL"))
-logger = get_task_logger(__name__)
+import trade_alerts
 
+app = Celery(broker='redis://localhost:6379')
 
-@app.task
-def add(x, y):
-    logger.info(f'Adding {x} + {y}')
-    return x + y
+app.config_from_object(celeryconfig)
+app.autodiscover_tasks()
+
+@shared_task
+def main():
+    uri = f"{trade_alerts.request_method} {trade_alerts.request_host}{trade_alerts.request_path}"
+    jwt_token = trade_alerts.build_jwt(trade_alerts.service_name, uri)
+    orders = trade_alerts.return_orders(jwt_token)
+    for order in orders["fills"]:
+        order_side = order["side"]
+        order_product_id = order["product_id"]
+        trade_alerts.send_message(order_side, order_product_id)
