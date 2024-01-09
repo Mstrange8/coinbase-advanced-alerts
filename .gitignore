@@ -1,0 +1,5 @@
+.env
+celerybeat-schedule.db
+coinbase_cloud_api_key.json
+venv/
+__pycache__/
