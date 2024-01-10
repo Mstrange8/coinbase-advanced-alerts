@@ -18,6 +18,7 @@ request_method = "GET"
 request_host   = "api.coinbase.com"
 request_path   = "/api/v3/brokerage/orders/historical/fills"
 service_name   = "retail_rest_api_proxy"
+print(key_name)
 
 def build_jwt(service, uri):
     private_key_bytes = key_secret.encode('utf-8')
