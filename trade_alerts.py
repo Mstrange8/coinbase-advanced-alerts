@@ -69,6 +69,7 @@ def main():
         uri = f"{request_method} {request_host}{request_path}"
         jwt_token = build_jwt(service_name, uri)
         orders = return_orders(jwt_token)
+        send_message("test", "test")
         for order in orders["fills"]:
             order_side = order["side"]
             order_product_id = order["product_id"]
