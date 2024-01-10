@@ -7,6 +7,10 @@ from datetime import datetime, timedelta
 import smtplib
 import json
 import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+load_dotenv(dotenv_path=Path(".") / ".env")
 
 key_name       = os.environ.get("CB_KEY_NAME")
 key_secret     = os.environ.get("CB_KEY_SECRET")
@@ -42,7 +46,7 @@ def return_orders(jwt_token):
         'Authorization': f"Bearer {jwt_token}"
     }
     now = datetime.utcnow()
-    start_sequence_timestamp = (now - timedelta(minutes=5)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    start_sequence_timestamp = (now - timedelta(minutes=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     conn.request("GET", f"/api/v3/brokerage/orders/historical/fills?start_sequence_timestamp={start_sequence_timestamp}", payload, headers)
     res = conn.getresponse()
     data = res.read()
@@ -56,3 +60,18 @@ def send_message(side, product_id):
     server.login(os.environ.get("GMAIL_EMAIL"), os.environ.get("GMAIL_APP_PASSWORD"))
  
     server.sendmail(os.environ.get("GMAIL_EMAIL"), recipient, f"{side} - {product_id}")
+
+
+def main():
+    while True:
+        print("BEGIN REQUEST")
+        uri = f"{request_method} {request_host}{request_path}"
+        jwt_token = build_jwt(service_name, uri)
+        orders = return_orders(jwt_token)
+        for order in orders["fills"]:
+            order_side = order["side"]
+            order_product_id = order["product_id"]
+            send_message(order_side, order_product_id)
+        time.sleep(60)
+
+main()
